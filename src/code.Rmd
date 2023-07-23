@@ -1,0 +1,384 @@
+---
+title: "Premier league skill analysis"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+## Objective:
+
+Simulating the performance in the 2022-2023 EPL season for the teams and using a latent skill estimate for determining the ranking of the teams by the latent skill level. Validating this against the actual EPL standings at the end of the season.
+
+We begin the analysis by importing the necessary packages for the analysis.
+
+```{r setup, include = FALSE, quietly = TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rstan)
+library(rstantools)
+library(cowplot)
+library(lubridate)
+library(dplyr)
+library(rmarkdown)
+rstan_options(auto_write = TRUE)  # To save some compiling
+```
+
+Loading the data and retaining only the columns that are need for this analysis.
+
+```{r}
+games_raw <- read_csv("../data/epl_2022_2023_matches.csv")
+head(games_raw)
+```
+
+```{r}
+
+games <- games_raw |>
+  mutate(date = as.numeric(format(as.Date(games_raw$Date, format="%d-%m-%Y"), "%Y")),
+         away_team = as.factor(Away),
+         home_team = as.factor(Home),
+         away_xg = as.numeric(away_xG),
+         home_xg = as.numeric(home_xG)
+         ) |>
+  select(
+    date, home_team, home_final_score, home_xg, away_team, away_final_score, away_xg
+  )
+head(games)
+
+```
+
+Creating a dictionary of ID for each of the teams in the league. There are `r length(unique(games_raw$home_team))` unique teams in this league season.
+
+```{r}
+dictionary_names <- tibble(
+  team = levels(games$away_team),
+  code = 1:20
+)
+
+# Ensuring the levels are per the alphabetical order
+levels(games$away_team) <- 1:20
+levels(games$home_team) <- 1:20
+```
+
+Creating new columns that we need for the analysis.
+
+```{r}
+
+games <- games %>%
+  mutate(
+    winning_team = case_when(
+      away_final_score > home_final_score ~ away_team,
+      away_final_score < home_final_score ~ home_team
+    ),
+    winning_score = case_when(
+      away_final_score > home_final_score ~ away_final_score,
+      away_final_score < home_final_score ~ home_final_score
+    ),
+    winning_xg = case_when(
+      away_xg > home_xg ~ away_xg,
+      away_xg < home_xg ~ home_xg
+    ),
+    losing_team = case_when(
+      away_final_score > home_final_score ~ home_team,
+      away_final_score < home_final_score ~ away_team
+    ),
+    losing_score = case_when(
+      away_final_score > home_final_score ~ home_final_score,
+      away_final_score < home_final_score ~ away_final_score
+    ),
+    losing_xg = case_when(
+      away_xg > home_xg ~ home_xg,
+      away_xg < home_xg ~ away_xg
+    ),
+    score_diff = winning_score - losing_score,
+    xg_diff = winning_xg - losing_xg
+  ) %>%
+  select(
+    winning_team, winning_score, winning_xg,
+    losing_team, losing_score, losing_xg, score_diff, xg_diff
+  )
+
+# Removing the rows where there is an NA, draws will be marked with NA
+games <- drop_na(games)
+```
+
+We are now left with `r nrow(games)` rows of data.
+
+## Building a model
+
+### Defining the Likelihood function
+
+The next step in our analysis is to design a Bayesian model that lets us infer a ranking of teams from the data. This is not an easy task; it does not fit into any of the usual kinds of problem.
+
+The scores of of the teams are integers, the expected goals (xg) for each team are floating point numbers. While the scores can only be positive integers including 0, expected goals can be any positive real number with 0.0 also a possibility. The higher the score or expected goals, the better the performance of the team.
+
+Let's now talk about the latent measure of Ranking. It refers to the relative performance of the team in the league. It is measured in reality using the point system, where each victory grants the team 3 points, a draw 1 point and none for a loss. However, it is well known that the points garnered in a season may not be fully in agreement with the relative skill of the team. The ranking as such are positive integers with a minimum integer (highest ranking) 1 and the maximum integer (lowest ranking) equal to the total number of teams participating in the season. Since the Winning/Losing scores are positive integers, we can model the game scores as a poisson distribution with parameter lambda (continuous parameter). However, taking the ranking of the team is not always a complete indicator of the game scores. This is because the highest ranked team does not imply they will have the highest score or highest score difference in every game. The games can be won with narrowest of score difference or the lowest possible score. Hence the scores of a team come from a distribution with parameter lambda that will need to be modeled properly.
+
+Rankings are hard to deal with both computationally (as they live in a really big discrete space) and in model design (as they do not have any nice simple parameterization). So often, a good strategy in this sort of model design setting is to introduce auxiliary variables that let you easily compute the quantity you care about (in this case, the ranking) without forcing you to deal with it explicitly.
+
+We could assign a non-negative skill value to each team; then, we could compute a ranking by simply sorting the teams from highest to lowest skill value.
+
+Instead of inferring ranking directly, let us infer a (totally hypothetical) skill value \$ S_j \\geq 0\$ for the $j$ th team, where $j = 1, \dots, t$ ($t$ is the number of teams in the league, 20 in this study). The $S_j$ ($j = 1, \dots, t$) are now the unknown variables in our model that we want to infer from data.
+
+We need a way to specify how our observed game result data were generated using those skill values.
+
+We will treat the `score_diff` of each game as our observation. Since `score_diff` is always a non-negative integer per game, we will use a Poisson distribution to model it.
+
+Thus, we have for the $i$ th game
+
+$$\texttt{score_diff}_i \sim \text{Poisson}(\lambda_i),$$
+
+where $\lambda_i$ is some continuous function of the skill of the winning team $w_i$ and the skill of the losing team $l_i$. $\lambda_i$ is allowed to be continuous in a Poisson random variable.
+
+The mean value of the `score_diff` is given by $\lambda$ since it is assumed to be Poisson distributed. Thus a higher `score_diff` implies a higher value of \$\\lambda\$, which in turn implies a higher difference in the skill levels of the winning and losing team. We need a functional representation of $\lambda$ such that it increases with the increase in difference in the skill levels of the winning and the losing team. Consequently the expected score difference also increases. This makes sense in the the context of the modelling of a football game outcome.
+
+One model that meet this criteria is as follows. This is be the **Likelihood function**.
+
+$\lambda_i = \log\big(1 + \exp(w_i - l_i)\big)$
+
+### Defining the Prior
+
+We need to pick a prior distribution for each of our unknown continuous `skill` values $S_j$ for $j = 1, \dots, t$.
+
+The skill for a team is a positive integer that is greater than equal to 0. Thus we can model its distribution as a Gamma distribution. Note that the parameters for the prior are assumed.
+
+```{stan output.var='football_stan_model'}
+data {                          
+int<lower=0> n;  // number of games in dataset (an integer larger or equal than zero)
+int<lower=0> t;  // number of teams (an integer larger or equal than zero)
+int<lower=1, upper=t> win_team[n];   // winning team ID VECTOR (size n of integer-type) whose IDs are larger or equal than one
+int<lower=1, upper=t> lose_team[n]; // losing team ID VECTOR (size n of integer-type) whose IDs are larger or equal than one
+int<lower=0> score_diff[n]; // VECTOR of score differences (size n of integer-type) with values equal or larger than zero 
+}
+parameters {
+vector<lower=0>[t] skill; // nonnegative VECTOR of posterior skills (i.e, larger or equal than zero) for t teams (size t)
+}
+model {
+for (j in 1:t){
+ skill[j] ~ gamma(1, 5);
+}
+for (i in 1:n){
+ int win_index = win_team[i];   //auxiliary variable of integer-type for w_i
+ int lose_index = lose_team[i]; //auxiliary variable of integer-type for l_i
+ score_diff[i] ~ poisson(log(1 + exp(skill[win_index] - skill[lose_index])));
+}
+}
+
+```
+
+### Sample and Visualize the Posterior
+
+Next, we will create the `list()` `football_dictionary` with different elements that we will pass into the stan model. In this case, we need the training sample size `n` (number of rows in games), the number of teams `t` (number of rows in `dictionary_names`), the `winning_team` numeric codes as integers per game (named as `win_team` in stan), the `losing_team` numeric codes as integers per game (named as `lose_team` in stan), and the `score_diff` as an integer per game.
+
+```{r}
+
+football_dictionary <- list(
+  n = nrow(games), 
+  t = nrow(dictionary_names),
+  win_team = as.integer(games$winning_team),
+  lose_team = as.integer(games$losing_team),
+  score_diff = as.integer(games$score_diff)
+)
+
+```
+
+Using this dictionary we can obtain the posterior distribution of skill. Using the stan model for iteration, `football_stan_model` and `sampling()` function we can store the results in a dataframe called `posterior_football`.
+
+```{r}
+posterior_football <- sampling(
+  object = football_stan_model, #Stan model
+  data = football_dictionary, # data for the model
+  chains = 1, # number of sampling runs
+  iter = 20000, # number of iterations
+  warmup = 2000, # burning iteration for stability
+  thin = 20, # number of steps to skip between each draw
+  seed = 553 # for reproducibility
+)
+
+posterior_football <- as.data.frame(posterior_football)
+```
+
+let us plot the 50% credible intervals around the median skill for each team coming from our simulated samples. However, before doing that, we need to wrangle `posterior_football` since it only provides the `skill` posterior samples by team in each column. Thus there are `r length(unique(games_raw$Away))` columns for each simulation. There is an additional column added during the simulation which is not needed for our evaluation. Each value represents the simulated skill level of the respective team in that simulation. The replicates in our Bayesian simulation are each of the rows in `posterior_football`.
+
+The last column needs to be dropped as mentioned above.
+
+```{r}
+# dropping the last column
+posterior_football <- posterior_football[, 1:20]
+
+# We create a new column indicating the replicate by row (900 in total).
+posterior_football$sample <- 1:nrow(posterior_football)
+
+## Melting the data frame leaving one column for the replicate number (sample),
+## another one indicating the team (as skill[1], ... skill[20]), and
+## the continuous posterior skill values from our Bayesian sampling.
+posterior_football <- posterior_football |>
+  pivot_longer(!sample, names_to = "team", values_to = "skill")
+
+```
+
+```{r}
+## Getting real team names stored in dictionary_names insead of the coded numbers
+posterior_football$team <- as.factor(posterior_football$team)
+dictionary_names <- dictionary_names %>%
+  mutate(code = paste("skill[", as.character(code), "]", sep = ""))
+recoding <- dictionary_names$team
+names(recoding) <- dictionary_names$code
+levels(posterior_football$team) <- recode(
+  levels(posterior_football$team),
+  !!!recoding)
+```
+
+We have several simulated posterior samples for each team. We cannot use the entire 900 simulations directly to plot our 50% credible intervals. Hence, grouping by team with the 900 samples to obtain the necessary intervals for each team.
+
+```{r}
+posterior_football_CIs <- posterior_football |>
+  group_by(team) |> summarise(lower_bound = quantile(skill, 0.25),
+                              median = quantile(skill, 0.5),
+                              upper_bound = quantile(skill, 0.75))
+head(posterior_football_CIs)
+```
+
+We can now visualize this for better understanding.
+
+```{r fig.width=7, fig.height=6}
+
+posterior_football_CIs <- posterior_football_CIs[order(-posterior_football_CIs$median), ]
+
+posterior_football_CIs_plot <- posterior_football_CIs |> ggplot(aes(x = median, y = reorder(team, median), color =team)) + geom_errorbarh(aes(xmin = lower_bound, xmax = upper_bound)) + geom_point() + labs(x = "Median", y= "Team Code", title = "50% Credible Intervals of Skill by Team - Using score") + theme_classic()
+
+posterior_football_CIs_plot
+ggsave("../img/50p_credible_interval_skill_score.png")
+
+```
+
+## Repeating Analysis using xG instead of score
+
+Alternatively we can use the expected goals as an indicator of the latent skill of the team.
+
+Similar to previous scenario we can use a non-negative skill value and use it to rank by simply sorting the teams from highest to lowest skill value.
+
+In this case we will treat the `xg_diff` of each game as our observation. Since `xg_diff` is a continuous number per game (it can be negative as well), we will use the normal distribution to model it.
+
+Thus, we have for the $i$ th game
+
+$$\texttt{xg_diff}_i \sim \text{Normal}(\mu_i, \sigma_i^2)$$
+
+where $\mu_i$ is a continuous value as a function of the skill of the winning team $w_i$ and the skill of the losing team $l_i$. $\sigma_i$ is the variance of this continuous value.
+
+Thus a higher `xg_diff` implies a higher value of $\mu$, which in turn implies a higher difference in the skill levels of the winning and losing team. We need a functional representation of $\mu$ such that it increases with the increase in difference in the skill levels of the winning and the losing team. Consequently the expected goal difference also increases. This makes sense in the the context of the modelling of a football game outcome.
+
+The $\sigma_i$ is the standard deviation of \$\\mu_i\$. For simplicity let's assume that $\sigma_i$ is equal to 1.
+
+The $\texttt{xg_diff}$ is a continuous real number. It is usually positive since the winning team is expected to have a higher xg than the loosing team. However, it is possible that a loosing theam may have a higher xg than the winning team. This happens when a team creates a lot of scoring chances with an attacking mindset, but it fails to convert most of the chances. On the contrary, in such a game the winning team might create less chances but be successful in converting in most of them. Such a scenario is often seen when a team plays counterattacking style to combat against an stronger opponent who plays a possession style of play.
+
+We can use the same **Likelihood function** as used before. The log(1+exp(x)) function is monotonic and increases with increase in x represented by the difference of \$w_i - l_i\$. Here $w_i$ and $l_i$ are the skill indexes of the winning and losing teams.
+
+With the expected goals approach, it is important to note that $\mu_i$ can also be negative. That is, there is provision for the skill index of the winning team to be less that than of the losing team. That is the expected goals of the winning team can be less than that of the losing team. I am going to enable this by using a negative offset to the previous formula. The negative 0.1 allows for a negative value for $\mu$.
+
+$\mu_i = -0.1 + \log\big(1 + \exp(w_i - l_i)\big)$
+
+Now creating the stan code.
+
+```{stan output.var='xgfootball_stan_model'}
+
+data {                          
+int<lower=0> n;  // number of games in dataset (an integer larger or equal than zero)
+int<lower=0> t;  // number of teams (an integer larger or equal than zero)
+int<lower=1, upper=t> win_team[n];   // winning team ID VECTOR (size n of integer-type) whose IDs are larger or equal than one
+int<lower=1, upper=t> lose_team[n]; // losing team ID VECTOR (size n of integer-type) whose IDs are larger or equal than one
+real xg_diff[n]; // VECTOR of expected goal differences (size n of float-type) 
+}
+parameters {
+vector<lower=0>[t] skill; // nonnegative VECTOR of posterior skills (i.e, larger or equal than zero) for t teams (size t)
+}
+model {
+for (j in 1:t){
+ skill[j] ~ gamma(1, 5);
+}
+for (i in 1:n){
+ int win_index = win_team[i];   //auxiliary variable of integer-type for w_i
+ int lose_index = lose_team[i]; //auxiliary variable of integer-type for l_i
+ xg_diff[i] ~ normal(-0.1+log(1 + exp(skill[win_index] - skill[lose_index])), 1);
+}
+}
+```
+
+Now we create the dictionary for the model
+
+```{r}
+xgfootball_dictionary <- list(
+  n = nrow(games), 
+  t = nrow(dictionary_names),
+  win_team = as.integer(games$winning_team),
+  lose_team = as.integer(games$losing_team),
+  xg_diff = as.numeric(games$xg_diff)
+)
+```
+
+Now, running the sampling as before
+
+```{r}
+posterior_xgfootball <- sampling(
+  object = xgfootball_stan_model, #Stan model
+  data = xgfootball_dictionary, # data for the model
+  chains = 1, # number of sampling runs
+  iter = 20000, # number of iterations
+  warmup = 2000, # burning iteration for stability
+  thin = 20, # number of steps to skip between each draw
+  seed = 553 # for reproducibility
+)
+
+posterior_xgfootball <- as.data.frame(posterior_xgfootball)
+```
+
+As before dropping the last column from the simulation samples. Then we do the pivot longer to transform the results to a usable form for plotting
+
+```{r}
+# dropping the last column
+posterior_xgfootball <- posterior_xgfootball[, 1:20]
+
+# We create a new column indicating the replicate by row (900 in total).
+posterior_xgfootball$sample <- 1:nrow(posterior_xgfootball)
+
+## Melting the data frame leaving one column for the replicate number (sample),
+## another one indicating the team (as skill[1], ... skill[20]), and
+## the continuous posterior skill values from our Bayesian sampling.
+posterior_xgfootball <- posterior_xgfootball |>
+  pivot_longer(!sample, names_to = "team", values_to = "skill")
+```
+
+Recoding to see the actual team names.
+
+```{r}
+## Getting real team names stored in dictionary_names insead of the coded numbers
+posterior_xgfootball$team <- as.factor(posterior_xgfootball$team)
+dictionary_names <- dictionary_names %>%
+  mutate(code = paste("skill[", as.character(code), "]", sep = ""))
+
+# recoding to football team names
+levels(posterior_xgfootball$team) <- recode(
+  levels(posterior_xgfootball$team),
+  !!!recoding)
+```
+
+Getting the 50% CI intervals as before.
+
+```{r}
+posterior_xgfootball_CIs <- posterior_xgfootball |>
+  group_by(team) |> summarise(lower_bound = quantile(skill, 0.25),
+                              median = quantile(skill, 0.5),
+                              upper_bound = quantile(skill, 0.75))
+head(posterior_xgfootball_CIs)
+```
+
+Visualizing for a better interpretation.
+
+```{r}
+posterior_xgfootball_CIs <- posterior_xgfootball_CIs[order(-posterior_football_CIs$median), ]
+
+posterior_xgfootball_CIs_plot <- posterior_xgfootball_CIs |> ggplot(aes(x = median, y = reorder(team, median), color =team)) + geom_errorbarh(aes(xmin = lower_bound, xmax = upper_bound)) + geom_point() + labs(x = "Median", y= "Team Code", title = "50% Credible Intervals of Skill by Team - Using xG") + theme_classic()
+
+posterior_xgfootball_CIs_plot
+ggsave("../img/50p_credible_interval_skill_xg.png")
+```

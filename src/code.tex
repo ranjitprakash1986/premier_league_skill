@@ -1,0 +1,416 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Premier league skill analysis},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Premier league skill analysis}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{objective}{%
+\subsection{Objective:}\label{objective}}
+
+Simulating the performance in the 2022-2023 EPL season for the teams and
+using a latent skill estimate for determining the ranking of the teams
+by the latent skill level. Validating this against the actual EPL
+standings at the end of the season.
+
+We begin the analysis by importing the necessary packages for the
+analysis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\NormalTok{opts\_chunk}\SpecialCharTok{$}\FunctionTok{set}\NormalTok{(}\AttributeTok{echo =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --
+## v dplyr     1.1.0     v readr     2.1.2
+## v forcats   1.0.0     v stringr   1.5.0
+## v ggplot2   3.4.1     v tibble    3.1.7
+## v lubridate 1.8.0     v tidyr     1.2.0
+## v purrr     0.3.4     
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+## i Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(rstan)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: StanHeaders
+## 
+## rstan version 2.26.14 (Stan version 2.26.1)
+## 
+## For execution on a local, multicore CPU with excess RAM we recommend calling
+## options(mc.cores = parallel::detectCores()).
+## To avoid recompilation of unchanged Stan programs, we recommend calling
+## rstan_options(auto_write = TRUE)
+## For within-chain threading using `reduce_sum()` or `map_rect()` Stan functions,
+## change `threads_per_chain` option:
+## rstan_options(threads_per_chain = 1)
+## 
+## Do not specify '-march=native' in 'LOCAL_CPPFLAGS' or a Makevars file
+## 
+## Attaching package: 'rstan'
+## 
+## The following object is masked from 'package:tidyr':
+## 
+##     extract
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(rstantools)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## This is rstantools version 2.2.0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(cowplot)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'cowplot'
+## 
+## The following object is masked from 'package:lubridate':
+## 
+##     stamp
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(lubridate)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{rstan\_options}\NormalTok{(}\AttributeTok{auto\_write =} \ConstantTok{TRUE}\NormalTok{)  }\CommentTok{\# To save some compiling}
+\end{Highlighting}
+\end{Shaded}
+
+Loading the data and retaining only the columns that are need for this
+analysis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{games\_raw }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"../data/epl\_2022\_2023\_matches.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 380 Columns: 16
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr (9): Day, Date, Time, Home, Score, Away, Venue, Referee, Match Report
+## dbl (5): Wk, home_xG, away_xG, home_final_score, away_final_score
+## lgl (1): Notes
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(games\_raw)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 16
+##      Wk Day   Date       Time    Home  home_xG Score away_xG Away  Atten~1 Venue
+##   <dbl> <chr> <chr>      <chr>   <chr>   <dbl> <chr>   <dbl> <chr>   <dbl> <chr>
+## 1     1 Fri   05-08-2022 20:00 ~ Crys~     1.2 0–2       1   Arse~   25286 Selh~
+## 2     1 Sat   06-08-2022 12:30 ~ Fulh~     1.2 2–2       1.2 Live~   22207 Crav~
+## 3     1 Sat   06-08-2022 15:00 ~ Tott~     1.5 4–1       0.5 Sout~   61732 Tott~
+## 4     1 Sat   06-08-2022 15:00 ~ Newc~     1.7 2–0       0.3 Nott~   52245 St J~
+## 5     1 Sat   06-08-2022 15:00 ~ Leed~     0.8 2–1       1.3 Wolv~   36347 Ella~
+## 6     1 Sat   06-08-2022 15:00 ~ Bour~     0.6 2–0       0.7 Asto~   11013 Vita~
+## # ... with 5 more variables: Referee <chr>, `Match Report` <chr>, Notes <lgl>,
+## #   home_final_score <dbl>, away_final_score <dbl>, and abbreviated variable
+## #   name 1: Attendance
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{games }\OtherTok{\textless{}{-}}\NormalTok{ games\_raw }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{date =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{format}\NormalTok{(}\FunctionTok{as.Date}\NormalTok{(games\_raw}\SpecialCharTok{$}\NormalTok{Date, }\AttributeTok{format=}\StringTok{"\%d{-}\%m{-}\%Y"}\NormalTok{), }\StringTok{"\%Y"}\NormalTok{)),}
+         \AttributeTok{away\_team =} \FunctionTok{as.factor}\NormalTok{(Away),}
+         \AttributeTok{home\_team =} \FunctionTok{as.factor}\NormalTok{(Home),}
+         \AttributeTok{away\_xg =} \FunctionTok{as.numeric}\NormalTok{(away\_xG),}
+         \AttributeTok{home\_xg =} \FunctionTok{as.numeric}\NormalTok{(home\_xG)}
+\NormalTok{         ) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{select}\NormalTok{(}
+\NormalTok{    date, home\_team, home\_final\_score, home\_xg, away\_team, away\_final\_score, away\_xg}
+\NormalTok{  )}
+\FunctionTok{head}\NormalTok{(games\_raw)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 16
+##      Wk Day   Date       Time    Home  home_xG Score away_xG Away  Atten~1 Venue
+##   <dbl> <chr> <chr>      <chr>   <chr>   <dbl> <chr>   <dbl> <chr>   <dbl> <chr>
+## 1     1 Fri   05-08-2022 20:00 ~ Crys~     1.2 0–2       1   Arse~   25286 Selh~
+## 2     1 Sat   06-08-2022 12:30 ~ Fulh~     1.2 2–2       1.2 Live~   22207 Crav~
+## 3     1 Sat   06-08-2022 15:00 ~ Tott~     1.5 4–1       0.5 Sout~   61732 Tott~
+## 4     1 Sat   06-08-2022 15:00 ~ Newc~     1.7 2–0       0.3 Nott~   52245 St J~
+## 5     1 Sat   06-08-2022 15:00 ~ Leed~     0.8 2–1       1.3 Wolv~   36347 Ella~
+## 6     1 Sat   06-08-2022 15:00 ~ Bour~     0.6 2–0       0.7 Asto~   11013 Vita~
+## # ... with 5 more variables: Referee <chr>, `Match Report` <chr>, Notes <lgl>,
+## #   home_final_score <dbl>, away_final_score <dbl>, and abbreviated variable
+## #   name 1: Attendance
+\end{verbatim}
+
+Creating a dictionary of ID for each of the teams in the league. There
+are 0 unique teams in this league season.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dictionary\_names }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}
+  \AttributeTok{team =} \FunctionTok{levels}\NormalTok{(games}\SpecialCharTok{$}\NormalTok{away\_team),}
+  \AttributeTok{code =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{20}
+\NormalTok{)}
+
+\CommentTok{\# Ensuring the levels are per the alphabetical order}
+\FunctionTok{levels}\NormalTok{(games}\SpecialCharTok{$}\NormalTok{away\_team) }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{:}\DecValTok{20}
+\FunctionTok{levels}\NormalTok{(games}\SpecialCharTok{$}\NormalTok{home\_team) }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{:}\DecValTok{20}
+\end{Highlighting}
+\end{Shaded}
+
+Creating new columns that we need for the analysis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{games }\OtherTok{\textless{}{-}}\NormalTok{ games }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{winning\_team =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textgreater{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ away\_team,}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textless{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ home\_team}
+\NormalTok{    ),}
+    \AttributeTok{winning\_score =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textgreater{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ away\_final\_score,}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textless{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ home\_final\_score}
+\NormalTok{    ),}
+    \AttributeTok{winning\_xg =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      away\_xg }\SpecialCharTok{\textgreater{}}\NormalTok{ home\_xg }\SpecialCharTok{\textasciitilde{}}\NormalTok{ away\_xg,}
+\NormalTok{      away\_xg }\SpecialCharTok{\textless{}}\NormalTok{ home\_xg }\SpecialCharTok{\textasciitilde{}}\NormalTok{ home\_xg}
+\NormalTok{    ),}
+    \AttributeTok{losing\_team =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textgreater{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ home\_team,}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textless{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ away\_team}
+\NormalTok{    ),}
+    \AttributeTok{losing\_score =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textgreater{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ home\_final\_score,}
+\NormalTok{      away\_final\_score }\SpecialCharTok{\textless{}}\NormalTok{ home\_final\_score }\SpecialCharTok{\textasciitilde{}}\NormalTok{ away\_final\_score}
+\NormalTok{    ),}
+    \AttributeTok{losing\_xg =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      away\_xg }\SpecialCharTok{\textgreater{}}\NormalTok{ home\_xg }\SpecialCharTok{\textasciitilde{}}\NormalTok{ home\_xg,}
+\NormalTok{      away\_xg }\SpecialCharTok{\textless{}}\NormalTok{ home\_xg }\SpecialCharTok{\textasciitilde{}}\NormalTok{ away\_xg}
+\NormalTok{    ),}
+    \AttributeTok{score\_diff =}\NormalTok{ winning\_score }\SpecialCharTok{{-}}\NormalTok{ losing\_score,}
+    \AttributeTok{xg\_diff =}\NormalTok{ winning\_xg }\SpecialCharTok{{-}}\NormalTok{ losing\_xg}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}
+\NormalTok{    winning\_team, winning\_score, winning\_xg,}
+\NormalTok{    losing\_team, losing\_score, losing\_xg, score\_diff, xg\_diff}
+\NormalTok{  )}
+
+\CommentTok{\# Removing the rows where there is an NA, draws will be marked with NA}
+\NormalTok{games }\OtherTok{\textless{}{-}} \FunctionTok{drop\_na}\NormalTok{(games)}
+\end{Highlighting}
+\end{Shaded}
+
+We are now left with 284` rows of data.
+
+\hypertarget{building-a-model}{%
+\subsection{Building a model}\label{building-a-model}}
+
+The next step in our analysis is to design a Bayesian model that lets us
+infer a ranking of teams from the data. This is not an easy task; it
+does not fit into any of the usual kinds of problem.
+
+The scores of of the teams are integers, the expected goals (xg) for
+each team are floating point numbers. While the scores can only be
+positive integers including 0, expected goals can be any positive real
+number with 0.0 also a possibility. The higher the score or expected
+goals, the better the performance of the team.
+
+Let's now talk about the latent measure of Ranking. It refers to the
+relative performance of the team in the league. It is measured in
+reality using the point system, where each victory grants the team 3
+points, a draw 1 point and none for a loss. However, it is well known
+that the points garnered in a season may not be fully in agreement with
+the relative skill of the team. The ranking as such are positive
+integers with a minimum integer (highest ranking) 1 and the maximum
+integer (lowest ranking) equal to the total number of teams
+participating in the season. Since the Winning/Losing scores are
+positive integers, we can model the game scores as a poisson
+distribution with parameter lambda (continuous parameter). However,
+taking the ranking of the team is not always a complete indicator of the
+game scores. This is because the highest ranked team does not imply they
+will have the highest score or highest score difference in every game.
+The games can be won with narrowest of score difference or the lowest
+possible score. Hence the scores of a team come from a distribution with
+parameter lambda that will need to be modeled properly.
+
+Rankings are hard to deal with both computationally (as they live in a
+really big discrete space) and in model design (as they do not have any
+nice simple parameterization). So often, a good strategy in this sort of
+model design setting is to introduce auxiliary variables that let you
+easily compute the quantity you care about (in this case, the ranking)
+without forcing you to deal with it explicitly.
+
+We could assign a non-negative skill value to each team; then, we could
+compute a ranking by simply sorting the teams from highest to lowest
+skill value.
+
+Instead of inferring ranking directly, let us infer a (totally
+hypothetical) skill value \$ S\_j \textbackslash geq 0\$ for the \(j\)
+th team, where \(j = 1, \dots, t\) (\(t\) is the number of teams in the
+league, 20 in this study). The \(S_j\) (\(j = 1, \dots, t\)) are now the
+unknown variables in our model that we want to infer from data.
+
+We need a way to specify how our observed game result data were
+generated using those skill values.
+
+We will treat the `score\_diff` of each game as our observation. Since
+`score\_diff` is always a non-negative integer **per game**, we will use
+a **Poisson distribution** to model it.
+
+Thus, we have for the \(i\) th game
+
+\[\texttt{score_diff}_i \sim \text{Poisson}(\lambda_i),\]
+
+where \(\lambda_i\) is some **continuous** function of the `skill` of
+the `winning\_team` (\$w\_i\$) and the `skill` of the `losing\_team`
+(\$l\_i\$). \(\lambda_i\) is allowed to be continuous in a Poisson
+random variable.
+
+The mean value of the \texttt{score\_diff} is given by \(\lambda\) since
+it is assumed to be Poisson distributed. Thus a higher
+\texttt{score\_diff} implies a higher value of
+\$\textbackslash lambda\$, which in turn implies a higher difference in
+the skill levels of the winning and losing team. We need a functional
+representation of \(\lambda\) such that it increases with the increase
+in difference in the skill levels of the winning and the losing team.
+Consequently the expected score difference also increases. This makes
+sense in the the context of the modelling of a football game outcome.
+
+One model that meet this criteria is as follows:
+
+\(\lambda_i = \log\big(1 + \exp(w_i - l_i)\big)\)
+
+\end{document}
