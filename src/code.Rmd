@@ -189,8 +189,8 @@ posterior_football <- sampling(
   object = football_stan_model, #Stan model
   data = football_dictionary, # data for the model
   chains = 1, # number of sampling runs
-  iter = 20000, # number of iterations
-  warmup = 2000, # burning iteration for stability
+  iter = 60000, # number of iterations
+  warmup = 6000, # burning iteration for stability
   thin = 20, # number of steps to skip between each draw
   seed = 553 # for reproducibility
 )
@@ -206,7 +206,7 @@ The last column needs to be dropped as mentioned above.
 # dropping the last column
 posterior_football <- posterior_football[, 1:20]
 
-# We create a new column indicating the replicate by row (900 in total).
+# We create a new column indicating the replicate by row (2700 in total).
 posterior_football$sample <- 1:nrow(posterior_football)
 
 ## Melting the data frame leaving one column for the replicate number (sample),
@@ -229,7 +229,7 @@ levels(posterior_football$team) <- recode(
   !!!recoding)
 ```
 
-We have several simulated posterior samples for each team. We cannot use the entire 900 simulations directly to plot our 50% credible intervals. Hence, grouping by team with the 900 samples to obtain the necessary intervals for each team.
+We have several simulated posterior samples for each team. We cannot use the entire 2700 simulations directly to plot our 50% credible intervals. Hence, grouping by team with the 2700 samples to obtain the necessary intervals for each team.
 
 ```{r}
 posterior_football_CIs <- posterior_football |>
@@ -323,8 +323,8 @@ posterior_xgfootball <- sampling(
   object = xgfootball_stan_model, #Stan model
   data = xgfootball_dictionary, # data for the model
   chains = 1, # number of sampling runs
-  iter = 20000, # number of iterations
-  warmup = 2000, # burning iteration for stability
+  iter = 60000, # number of iterations
+  warmup = 6000, # burning iteration for stability
   thin = 20, # number of steps to skip between each draw
   seed = 553 # for reproducibility
 )
@@ -338,7 +338,7 @@ As before dropping the last column from the simulation samples. Then we do the p
 # dropping the last column
 posterior_xgfootball <- posterior_xgfootball[, 1:20]
 
-# We create a new column indicating the replicate by row (900 in total).
+# We create a new column indicating the replicate by row (2700 in total).
 posterior_xgfootball$sample <- 1:nrow(posterior_xgfootball)
 
 ## Melting the data frame leaving one column for the replicate number (sample),
